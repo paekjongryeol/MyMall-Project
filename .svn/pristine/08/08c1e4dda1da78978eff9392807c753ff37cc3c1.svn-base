@@ -1,0 +1,9 @@
+spring.application.name=mymall
+
+server.port=8080
+
+#Oracle 정보
+spring.datasource.hikari.driver-class-name=oracle.jdbc.OracleDriver
+spring.datasource.hikari.jdbc-url=jdbc:oracle:thin:@localhost:1521:orcl
+spring.datasource.hikari.username=system
+spring.datasource.hikari.password=11111111

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.main.dao.MainDao">
+	
+	<resultMap type="com.mall.table.vo.GoodsInfoVO" id="mainMap">
+		<result property="goodsCd" column="goods_cd" />
+		<result property="ctCd" column="ct_cd" />
+		<result property="goodsName" column="goods_name" />
+		<result property="normalPrice" column="normal_price" />
+		<result property="sellPrice" column="sell_price" />
+		<result property="ivQty" column="iv_qty" />
+		<result property="goodsStatus" column="goods_status" />
+		<result property="supplierCd" column="supplier_cd" />
+		<result property="thumnailUrl" column="thumnail_url" />
+		<result property="content" column="content" />
+		<result property="ctName" column="ct_name" />
+		<result property="ctLevel" column="ct_level" />
+		<result property="upCtCd" column="up_ct_cd" />
+		<result property="regDt" column="reg_dt" />
+	</resultMap>
+	
+	<resultMap type="com.mall.table.vo.GoodsCategoryVO" id="categoryMap">
+		<result property="ctName" 	column="ct_name" />
+		<result property="ctCd" 	column="ct_cd" />
+		<result property="ctLevel" column="ct_level" />
+		<result property="upCtCd" column="up_ct_cd" />
+	</resultMap>
+	
+	
+	<select id="selectGoodsInfo" resultMap="mainMap">
+		SELECT
+		    THUMNAIL_URL,
+		    GOODS_NAME,
+		    SELL_PRICE,
+		    GOODS_CD,
+		    CT_CD
+		FROM
+		    (SELECT
+		        A.THUMNAIL_URL,
+		        A.GOODS_NAME,
+		        A.SELL_PRICE,
+		        A.GOODS_CD,
+		        B.CT_CD
+		    FROM
+		        TB_GOODS_INFO A, (
+		        	select CT_CD, CT_NAME from tb_goods_category
+					where ct_level=1
+		        ) B
+		     WHERE A.CT_CD LIKE B.CT_CD||'%'   
+		    ORDER BY
+		        A.REG_DT DESC)
+		WHERE
+		    ROWNUM <![CDATA[ <= ]]> 12
+	</select>
+	
+	<select id="selectGoodsCategory" resultMap="categoryMap">
+		SELECT
+			CT_CD,
+			CT_NAME
+		 FROM TB_GOODS_CATEGORY
+		 WHERE CT_LEVEL=1
+	</select>
+	
+	
+	
+</mapper>

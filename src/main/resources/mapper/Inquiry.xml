@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.inquiry.dao.InquiryDao">
+	
+	<resultMap type="com.mall.table.vo.InquiryInfoVO" id="inquiryMap">
+		<result property="userId" 			column="user_id" />
+		<result property="boardSeq" 		column="board_seq" />
+		<result property="boardType"	 	column="board_type" />
+		<result property="title"	 		column="title" />
+		<result property="content"	 		column="content" />
+		<result property="attchFile" 		column="attch_file" />
+		<result property="replyYn" 			column="reply_yn" />
+		<result property="replyContent"	 	column="reply_content" />
+		<result property="replyDt" 			column="reply_dt" />
+		<result property="regDt" 			column="reg_dt" />
+		<result property="delYn" 			column="del_yn" />
+		<result property="userName" 		column="user_name" />
+	</resultMap>
+		
+		
+		<select id="selectTotalInquiryCount" resultType="integer">
+			SELECT COUNT(*)
+		    FROM TB_BOARD_INFO A
+		    JOIN TB_USER_INFO B ON A.USER_ID = B.USER_ID
+		    WHERE 1=1
+			    <if test="replyYn != null and replyYn != ''">
+			        AND A.REPLY_YN = #{replyYn}
+			    </if>
+		</select>
+	
+		<select id="selectInquiryList" resultMap="inquiryMap">
+		    SELECT
+			    BOARD_SEQ,
+			    BOARD_TYPE,
+			    USER_ID,
+			    TITLE,
+			    REG_DT,
+			    REPLY_YN
+			FROM (
+			    SELECT
+			        ROWNUM AS RN,
+			        A.BOARD_SEQ,
+			        A.BOARD_TYPE,
+			        B.USER_ID,
+			        A.TITLE,
+			        A.REG_DT,
+			        A.REPLY_YN
+			    FROM TB_BOARD_INFO A
+			    JOIN TB_USER_INFO B ON A.USER_ID = B.USER_ID
+			    WHERE 1=1
+		        <if test="replyYn != null and replyYn != ''">
+		            AND A.REPLY_YN = #{replyYn}
+		        </if>
+		    ) A
+		    WHERE RN <![CDATA[ > ]]> (#{currentPage}-1)*#{countPerPage} 
+		    AND RN <![CDATA[ <= ]]> #{currentPage}*#{countPerPage}
+		</select>
+
+		<select id="selectInquiryInfo" resultMap="inquiryMap">
+			SELECT
+			    A.TITLE,
+			    A.BOARD_TYPE,
+			    B.USER_ID,
+			    B.USER_NAME,
+			    A.REG_DT,
+			    A.ATTCH_FILE,
+			    A.CONTENT,
+			    A.REPLY_CONTENT
+			FROM  
+			    TB_BOARD_INFO A
+			JOIN  
+			    TB_USER_INFO B ON A.USER_ID = B.USER_ID
+			WHERE 
+			    B.USER_ID = #{userId}
+			AND A.BOARD_SEQ=#{boardSeq}
+		</select>
+		
+		<insert id="insertInquiry">
+		    INSERT INTO TB_BOARD_INFO
+		        (USER_ID, BOARD_SEQ, BOARD_TYPE, TITLE, CONTENT, ATTCH_FILE, REG_DT, REPLY_YN)
+		    VALUES
+		        (#{userId}, 
+		        (SELECT COALESCE(MAX(TO_NUMBER(BOARD_SEQ)), 0) + 1 FROM TB_BOARD_INFO), 
+		        #{boardType}, 
+		        #{title}, 
+		        #{content}, 
+		        #{attchFile}, 
+		        SYSDATE,
+		        'N')
+		</insert>
+
+</mapper>

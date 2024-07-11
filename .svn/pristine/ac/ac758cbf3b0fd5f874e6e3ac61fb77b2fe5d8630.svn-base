@@ -1,0 +1,13 @@
+package com.mall.goods.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller	
+public class GoodsController {
+	
+	@RequestMapping("/goods/view")
+	public String main() throws Exception {
+		return "goods/goodsinfo";
+	}
+}

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.goods.dao.GoodsDao">
+	
+	<resultMap type="com.mall.table.vo.GoodsInfoVO" id="goodsMap">
+		<result property="goodsCd" column="goods_cd" />
+		<result property="ctCd" column="ct_cd" />
+		<result property="goodsName" column="goods_name" />
+		<result property="normalPrice" column="normal_price" />
+		<result property="sellPrice" column="sell_price" />
+		<result property="ivQty" column="iv_qty" />
+		<result property="goodsStatus" column="goods_status" />
+		<result property="supplierCd" column="supplier_cd" />
+		<result property="thumnailUrl" column="thumnail_url" />
+		<result property="content" column="content" />
+		<result property="ctName" column="ct_name" />
+		<result property="ctLevel" column="ct_level" />
+		<result property="upCtCd" column="up_ct_cd" />
+		<result property="regDt" column="reg_dt" />
+	</resultMap>
+		
+	<select id="selectGoodsContent" resultMap="goodsMap">
+		SELECT
+			GOODS_CD,
+			GOODS_NAME,
+			NORMAL_PRICE,
+			SELL_PRICE,
+			CONTENT
+			FROM TB_GOODS_INFO
+		 WHERE GOODS_CD = #{goodsCd}
+	</select>
+	
+	<resultMap type="com.mall.table.vo.GoodsImgVO" id="imgMap">
+		<result property="goodsCd" column="goods_cd" />
+		<result property="imgSeq" column="img_seq" />
+		<result property="imgUrl" column="img_url" />
+		<result property="fileName" column="file_name" />
+		<result property="regDt" column="reg_dt" />
+		<result property="delYn" column="del_yn" />
+	</resultMap>
+	
+	<select id="selectGoodsImg" resultMap="imgMap">
+		SELECT 
+		    A.IMG_URL
+		    FROM TB_GOODS_IMG A, TB_GOODS_INFO B
+		    WHERE A.GOODS_CD = B.GOODS_CD
+		    AND A.GOODS_CD = #{goodsCd}	
+	</select>
+	
+	
+	<resultMap type="com.mall.table.vo.CartInfoVO" id="cartMap">
+		<result property="goodsCd" column="goods_cd" />
+		<result property="userId" column="user_id" />
+		<result property="buyQty" column="buy_qty" />
+		<result property="regDt" column="reg_dt" />
+	</resultMap>
+	
+	<insert id="insertCartList" parameterType="com.mall.table.vo.CartInfoVO">
+		INSERT INTO TB_CART_INFO (USER_ID, GOODS_CD, BUY_QTY, REG_DT)
+		VALUES(#{userId}, #{goodsCd}, #{buyQty}, SYSDATE )
+	</insert>
+	
+	
+	<select id="selectCartCount" resultType="integer">
+		SELECT 
+			  COUNT(*)
+			FROM TB_CART_INFO
+			WHERE USER_ID = #{userId}
+			  and goods_cd = #{goodsCd}
+	</select>
+		                
+</mapper>

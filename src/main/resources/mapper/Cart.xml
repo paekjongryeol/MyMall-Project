@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.cart.dao.CartDao">
+	
+	<resultMap type="com.mall.table.vo.CartInfoVO" id="cartMap">
+		<result property="goodsCd" column="goods_cd" />
+		<result property="userId" column="user_id" />
+		<result property="buyQty" column="buy_qty" />
+		<result property="regDt" column="reg_dt" />
+		<result property="sellPrice" column="sell_price" />
+		<result property="thumnailUrl" column="thumnail_url" />
+		<result property="goodsName" column="goods_name" />
+	</resultMap>
+	
+	<resultMap type="com.mall.table.vo.UserInfoVO" id="userMap">
+		<result property="userId" 		column="user_id" />
+		<result property="userName" 	column="user_name" />
+		<result property="userPwd"	 	column="user_pwd" />
+		<result property="phone"	 	column="phone" />
+		<result property="email"	 	column="email" />
+		<result property="addr" 		column="addr" />
+		<result property="addrDtl" 		column="addr_dtl" />
+	</resultMap>
+	
+	<resultMap type="com.mall.table.vo.GoodsInfoVO" id="goodsMap">
+		<result property="goodsCd" column="goods_cd" />
+		<result property="ctCd" column="ct_cd" />
+		<result property="goodsName" column="goods_name" />
+		<result property="normalPrice" column="normal_price" />
+		<result property="sellPrice" column="sell_price" />
+		<result property="ivQty" column="iv_qty" />
+		<result property="goodsStatus" column="goods_status" />
+		<result property="thumnailUrl" column="thumnail_url" />
+		<result property="regDt" column="reg_dt" />
+	</resultMap>
+	
+	<select id="selectCartList" resultMap="cartMap">
+		SELECT 
+            A.THUMNAIL_URL,
+		    A.GOODS_NAME,
+		    C.BUY_QTY,
+		    A.SELL_PRICE,
+		    C.GOODS_CD
+		FROM TB_GOODS_INFO A, TB_USER_INFO B, TB_CART_INFO C
+		WHERE A.GOODS_CD = C.GOODS_CD
+		AND B.USER_ID = C.USER_ID
+        AND C.USER_ID = #{userId}
+    </select>
+    
+    <delete id="deleteCartInfo">
+	    DELETE FROM tb_cart_info
+	    WHERE goods_cd = #{goodsCd}
+	</delete>
+	
+	<select id="selectUserList" resultMap="userMap">
+	    select 
+		    user_name,
+		    phone,
+		    addr,
+		    user_id
+		    from tb_user_info
+	   		where user_id = #{userId}
+    </select>
+    
+	<resultMap type="com.mall.table.vo.OrderInfoVO" id="orderMap">
+		<result property="orderNo" column="order_no" />
+		<result property="userId" column="user_id" />
+		<result property="receiveName" column="receive_name" />
+		<result property="receivePhone" column="receive_phone" />
+		<result property="addrDtl" column="addr_dtl" />
+		<result property="payment" column="payment" />
+		<result property="sellPrice" column="sell_price" />
+		
+	</resultMap>
+	
+	<select id="selectNewOrderNo" resultType="string">
+	 SELECT MAX(TO_NUMBER(ORDER_NO))+1 FROM TB_ORDER_INFO
+	</select>
+	
+    <insert id="insertOrderInfo">
+    	INSERT INTO TB_ORDER_INFO
+		(
+		    ORDER_NO, USER_ID, ORDER_GOODS_NAME,
+		    ORDER_PRICE, ORDER_STATUS, ORDER_DT, 
+		    RECEIVE_NAME,RECEIVE_PHONE, ADDR, REG_DT, PAYMENT 
+		)
+		
+		SELECT 
+		    #{orderNo},
+		    #{userId},
+		    CASE WHEN CNT >1 THEN GOODS_NAME || ' 외 ' || (CNT-1) || '건'
+		    ELSE GOODS_NAME
+		    END ORDER_GOODS_NAME,
+		    ORDER_PRICE,
+		    '주문완료',
+		    sysdate,
+		    #{receiveName},
+		    #{receivePhone},
+		    #{addr},
+		    sysdate,
+		    #{payment}
+		 FROM (
+		SELECT COUNT(*) CNT, MAX(B.GOODS_NAME) GOODS_NAME, SUM(A.BUY_QTY*B.SELL_PRICE) ORDER_PRICE
+		  FROM TB_CART_INFO A, TB_GOODS_INFO B
+		WHERE A.GOODS_CD = B.GOODS_CD
+		 AND A.USER_ID= #{userId}
+		 )
+    </insert>
+    
+    <insert id="insertOrderGoods">
+	    INSERT INTO TB_ORDER_GOODS
+			 (ORDER_NO, GOODS_CD, UNIT_PRICE, BUY_QTY)
+			 select #{orderNo}, A.GOODS_CD, B.SELL_PRICE, A.BUY_QTY
+		from TB_CART_INFO A, TB_GOODS_INFO B
+		WHERE A.GOODS_CD = B.GOODS_CD
+		AND A.USER_ID= #{userId}
+    </insert>
+    
+    <delete id="deleteCartOrderInfo">
+    	DELETE FROM TB_CART_INFO
+			WHERE USER_ID = #{userId}
+    </delete>
+</mapper>

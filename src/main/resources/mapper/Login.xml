@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.login.dao.LoginDao">
+	
+	<resultMap type="com.mall.table.vo.UserInfoVO" id="userMap">
+		<result property="userId" column="user_id"/>
+		<result property="userPwd" column="user_pwd"/>
+		<result property="userName" column="user_name"/>
+		<result property="phone" column="phone"/>
+		<result property="email" column="email"/>
+	</resultMap>
+	
+	<select id="selectUserInfo" resultMap="userMap">
+		SELECT 
+			USER_ID,
+			USER_PWD,
+			USER_NAME,
+			PHONE,
+			EMAIL
+		  FROM TB_USER_INFO
+		 WHERE USER_ID = #{userId} 
+	</select>
+	
+</mapper>
